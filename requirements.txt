@@ -1,0 +1,5 @@
+fastapi
+yfinance
+uvicorn
+requests
+python-dotenv
