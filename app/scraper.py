@@ -6,7 +6,11 @@ def fetch_nifty():
     try:
         info = ticker.fast_info
         current_price = float(info["last_price"])
-        prev_close = float(info["previous_close"])
+        # prev_close = float(info["previous_close"])
+
+        new_data = ticker.history(period="5d")
+        prev_close = float(new_data["Close"].iloc[-2])
+
     except Exception:
         data = ticker.history(period="5d")
         if len(data) < 2:
@@ -41,7 +45,11 @@ def fetch_sensex():
     try:
         info = ticker.fast_info
         current_price = float(info["last_price"])
-        prev_close = float(info["previous_close"])
+        # prev_close = float(info["previous_close"])
+
+        new_data = ticker.history(period="5d")
+        prev_close = float(new_data["Close"].iloc[-2])
+
     except Exception:
         data = ticker.history(period="5d")
         if len(data) < 2:
