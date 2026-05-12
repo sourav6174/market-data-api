@@ -80,76 +80,98 @@ def fetch_sensex():
 
 # Sector Tickers
 
-SECTOR_TICKERS = {
-    "banking": "^NSEBANK",
-    "it": "^CNXIT",
-    "pharma": "NIFTY_PHARMA.NS",
-    "fmcg": "NIFTY_FMCG.NS",
-    "auto": "NIFTY_AUTO.NS",
+SECTOR_STOCKS = {
 
-    # NEW SECTORS
-    "energy_oil_gas": "NIFTY_ENERGY.NS",
-    "metals_mining": "NIFTY_METAL.NS",
-    "infra_real_estate": "NIFTY_INFRA.NS"
+    "banking": [
+        "HDFCBANK.NS",
+        "ICICIBANK.NS",
+        "SBIN.NS"
+    ],
+    "it": [
+        "TCS.NS",
+        "INFY.NS",
+        "WIPRO.NS"
+    ],
+    "pharma": [
+        "SUNPHARMA.NS",
+        "CIPLA.NS",
+        "DRREDDY.NS"
+    ],
+    "fmcg": [
+        "HINDUNILVR.NS",
+        "ITC.NS",
+        "NESTLEIND.NS"
+    ],
+    "auto": [
+        "MARUTI.NS",
+        "TATAMOTORS.NS",
+        "M&M.NS"
+    ],
+    "energy_oil_gas": [
+        "RELIANCE.NS",
+        "ONGC.NS",
+        "BPCL.NS"
+    ],
+    "metals_mining": [
+        "TATASTEEL.NS",
+        "HINDALCO.NS",
+        "JSWSTEEL.NS"
+    ],
+    "infra_real_estate": [
+        "LT.NS",
+        "DLF.NS",
+        "GODREJPROP.NS"
+    ]
 }
 
-def fetch_sector_data(name, ticker_symbol):
+def fetch_sector_data(sector_name, stocks):
 
-    ticker = yf.Ticker(ticker_symbol)
+    changes = []
 
-    try:
-        info = ticker.fast_info
+    for stock_symbol in stocks:
+        try:
+            ticker = yf.Ticker(stock_symbol)
+            info = ticker.fast_info
+            current_price = float(info["last_price"])
+            prev_close = float(info["previous_close"])
+            percent_change = (
+                (current_price - prev_close) / prev_close
+            ) * 100
+            changes.append(percent_change)
 
-        current_price = float(info["last_price"])
-        prev_close = float(info["previous_close"])
+        except Exception:
+            continue
 
-    except Exception:
+    if not changes:
+        return {
+            "sector": sector_name,
+            "error": "Data unavailable"
+        }
 
-        data = ticker.history(period="5d")
+    avg_change = sum(changes) / len(changes)
 
-        if len(data) < 2:
-            return {
-                "sector": name,
-                "error": "Data unavailable"
-            }
-
-        current_price = float(data["Close"].iloc[-1])
-        prev_close = float(data["Close"].iloc[-2])
-
-    change = current_price - prev_close
-    percent = (change / prev_close) * 100
-
-    # Sentiment logic
-    if percent > 0:
+    if avg_change > 0:
         sentiment = "bullish"
         color = "green"
-
-    elif percent < 0:
+    elif avg_change < 0:
         sentiment = "bearish"
         color = "red"
-
     else:
         sentiment = "neutral"
         color = "gray"
 
     return {
-        "sector": name,
-        "price": round(current_price, 2),
-        "change": round(change, 2),
-        "percent_change": round(percent, 2),
+        "sector": sector_name,
+        "percent_change": round(avg_change, 2),
         "sentiment": sentiment,
         "color": color
     }
 
 def fetch_sector_heatmap():
-
-    sectors = {}
-
-    for sector_name, ticker_symbol in SECTOR_TICKERS.items():
-
-        sectors[sector_name] = fetch_sector_data(
+    heatmap = {}
+    for sector_name, stocks in SECTOR_STOCKS.items():
+        heatmap[sector_name] = fetch_sector_data(
             sector_name,
-            ticker_symbol
+            stocks
         )
-
-    return sectors
+    return heatmap
