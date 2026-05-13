@@ -104,7 +104,7 @@ SECTOR_STOCKS = {
     ],
     "auto": [
         "MARUTI.NS",
-        "TATAMOTORS.BO",
+        "TATAMOTORS.NS",
         "M&M.NS"
     ],
     "energy_oil_gas": [
