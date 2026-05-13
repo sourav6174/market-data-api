@@ -104,7 +104,7 @@ SECTOR_STOCKS = {
     ],
     "auto": [
         "MARUTI.NS",
-        "TATAMOTORS.NS",
+        "TATAMOTORS.BO",
         "M&M.NS"
     ],
     "energy_oil_gas": [
@@ -131,12 +131,22 @@ def fetch_sector_data(sector_name, stocks):
     for stock_symbol in stocks:
         try:
             ticker = yf.Ticker(stock_symbol)
-            info = ticker.fast_info
-            current_price = float(info["last_price"])
-            prev_close = float(info["previous_close"])
-            percent_change = (
-                (current_price - prev_close) / prev_close
-            ) * 100
+            try:
+                info = ticker.fast_info
+                current_price = float(
+                    info["last_price"]
+                )
+                data = ticker.history(period="5d")
+                prev_close = float(data["Close"].iloc[-2])
+
+            except Exception:
+                data = ticker.history(period="5d")
+                if len(data) < 2:
+                    continue
+                current_price = float(data["Close"].iloc[-1])
+                prev_close = float(data["Close"].iloc[-2])
+
+            percent_change = ((current_price - prev_close)/ prev_close) * 100
             changes.append(percent_change)
 
         except Exception:
@@ -175,3 +185,43 @@ def fetch_sector_heatmap():
             stocks
         )
     return heatmap
+
+def fetch_market_asset(symbol, name):
+    ticker = yf.Ticker(symbol)
+    try:
+        info = ticker.fast_info
+        current_price = float(info["last_price"])
+        data = ticker.history(period="5d")
+        prev_close = float(data["Close"].iloc[-2])
+
+    except Exception:
+        data = ticker.history(period="5d")
+        if len(data) < 2:
+            return {
+                "name": name,
+                "error": "Data unavailable"
+            }
+        current_price = float(data["Close"].iloc[-1])
+        prev_close = float(data["Close"].iloc[-2])
+
+    change = current_price - prev_close
+    percent_change = (change / prev_close) * 100
+
+    return {
+        "name": name,
+        "price": round(current_price, 2),
+        "change": round(change, 2),
+        "percent_change": round(percent_change, 2)
+    }
+
+def fetch_india_vix():
+    return fetch_market_asset("^INDIAVIX", "India VIX")
+
+def fetch_usd_inr():
+    return fetch_market_asset("INR=X", "USD/INR")
+
+def fetch_crude_oil():
+    return fetch_market_asset("BZ=F","Brent Crude")
+
+def fetch_gold():
+    return fetch_market_asset("GC=F", "Gold")
