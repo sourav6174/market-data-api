@@ -225,3 +225,45 @@ def fetch_crude_oil():
 
 def fetch_gold():
     return fetch_market_asset("GC=F", "Gold")
+
+WORLD_INDICES = {
+    "nasdaq": {
+        "symbol": "^IXIC",
+        "name": "Nasdaq"
+    },
+    "dow_jones": {
+        "symbol": "^DJI",
+        "name": "Dow Jones"
+    },
+    "sp_500": {
+        "symbol": "^GSPC",
+        "name": "S&P 500"
+    },
+    "nikkei_225": {
+        "symbol": "^N225",
+        "name": "Nikkei 225"
+    },
+    "shanghai_composite": {
+        "symbol": "000001.SS",
+        "name": "Shanghai Composite"
+    },
+    "ftse_100": {
+        "symbol": "^FTSE",
+        "name": "FTSE 100"
+    },
+    "dax": {
+        "symbol": "^GDAXI",
+        "name": "DAX"
+    }
+}
+
+def fetch_world_indices():
+    indices_data = {}
+    for key, value in WORLD_INDICES.items():
+        symbol = value["symbol"]
+        name = value["name"]
+        indices_data[key] = fetch_market_asset(
+            symbol,
+            name
+        )
+    return indices_data

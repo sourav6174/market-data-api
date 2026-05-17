@@ -8,7 +8,8 @@ from app.scraper import (
     fetch_india_vix,
     fetch_usd_inr,
     fetch_crude_oil,
-    fetch_gold
+    fetch_gold,
+    fetch_world_indices
 )
 from app.cache import get_cached
 
@@ -33,6 +34,7 @@ def market_data():
         usd_inr = get_cached("usd_inr", fetch_usd_inr)
         crude = get_cached("crude", fetch_crude_oil)
         gold = get_cached("gold", fetch_gold)
+        world_indices = get_cached("world_indices", fetch_world_indices)
 
         return {
             "nifty": nifty,
@@ -43,7 +45,8 @@ def market_data():
                 "usd_inr": usd_inr,
                 "crude_oil": crude,
                 "gold": gold
-            }
+            },
+            "world_indices": world_indices
         }
 
     except Exception as e:
