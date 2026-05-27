@@ -9,7 +9,8 @@ from app.scraper import (
     fetch_usd_inr,
     fetch_crude_oil,
     fetch_gold,
-    fetch_world_indices
+    fetch_world_indices,
+    fetch_market_movers
 )
 from app.cache import get_cached
 
@@ -35,6 +36,7 @@ def market_data():
         crude = get_cached("crude", fetch_crude_oil)
         gold = get_cached("gold", fetch_gold)
         world_indices = get_cached("world_indices", fetch_world_indices)
+        market_movers = get_cached("market_movers", fetch_market_movers)
 
         return {
             "nifty": nifty,
@@ -46,7 +48,8 @@ def market_data():
                 "crude_oil": crude,
                 "gold": gold
             },
-            "world_indices": world_indices
+            "world_indices": world_indices,
+            "top_movers": market_movers
         }
 
     except Exception as e:

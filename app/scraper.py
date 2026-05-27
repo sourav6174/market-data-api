@@ -267,3 +267,125 @@ def fetch_world_indices():
             name
         )
     return indices_data
+
+LARGE_CAP_STOCKS = [
+
+    "RELIANCE.NS",
+    "HDFCBANK.NS",
+    "ICICIBANK.NS",
+    "INFY.NS",
+    "TCS.NS",
+    "ITC.NS",
+    "SBIN.NS",
+    "BHARTIARTL.NS",
+    "LT.NS",
+    "HINDUNILVR.NS"
+]
+
+MID_CAP_STOCKS = [
+
+    "BHEL.NS",
+    "SAIL.NS",
+    "IDFCFIRSTB.NS",
+    "ASHOKLEY.NS",
+    "PERSISTENT.NS",
+    "MPHASIS.NS",
+    "POLYCAB.NS",
+    "AUROPHARMA.NS",
+    "INDHOTEL.NS",
+    "COFORGE.NS"
+]
+
+SMALL_CAP_STOCKS = [
+
+    "SUZLON.NS",
+    "RVNL.NS",
+    "IRFC.NS",
+    "NBCC.NS",
+    "JPPOWER.NS",
+    "HFCL.NS",
+    "IREDA.NS",
+    "PNCINFRA.NS",
+    "EASEMYTRIP.NS",
+    "BLS.NS"
+]
+
+def fetch_top_movers(stock_list):
+    movers = []
+    for symbol in stock_list:
+        try:
+            ticker = yf.Ticker(symbol)
+            try:
+                info = ticker.fast_info
+                current_price = float(
+                    info["last_price"]
+                )
+                data = ticker.history(
+                    period="5d"
+                )
+                prev_close = float(
+                    data["Close"].iloc[-2]
+                )
+            except Exception:
+                data = ticker.history(
+                    period="5d"
+                )
+                if len(data) < 2:
+                    continue
+                current_price = float(
+                    data["Close"].iloc[-1]
+                )
+                prev_close = float(
+                    data["Close"].iloc[-2]
+                )
+            percent_change = (
+                (
+                    current_price - prev_close
+                ) / prev_close
+            ) * 100
+            movers.append({
+                "symbol": symbol.replace(
+                    ".NS",
+                    ""
+                ),
+                "price": round(
+                    current_price,
+                    2
+                ),
+                "percent_change": round(
+                    percent_change,
+                    2
+                )
+            })
+        except Exception:
+            continue
+
+    gainers = sorted(
+        movers,
+        key=lambda x: x["percent_change"],
+        reverse=True
+    )[:5]
+
+    losers = sorted(
+        movers,
+        key=lambda x: x["percent_change"]
+    )[:5]
+
+    return {
+        "gainers": gainers,
+        "losers": losers
+    }
+
+def fetch_market_movers():
+
+    return {
+        "large_cap": fetch_top_movers(
+            LARGE_CAP_STOCKS
+        ),
+        "mid_cap": fetch_top_movers(
+            MID_CAP_STOCKS
+        ),
+        "small_cap": fetch_top_movers(
+            SMALL_CAP_STOCKS
+        )
+    }
